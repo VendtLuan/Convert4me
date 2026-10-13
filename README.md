@@ -19,7 +19,7 @@ O endpoint `POST /convert` repassa o Bearer para a API Genesys (`GENESYS_API_URL
 Authorization: Bearer <token Genesys>
 ```
 
-Configure `GENESYS_API_URL` (veja `.env.example`).
+Configure `GENESYS_API_URL` em `.env` na raiz do projeto (veja `.env.example`). O arquivo é carregado na subida via `dotenv` em `main.ts`.
 
 ## Project setup
 
