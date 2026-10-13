@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 
 /** Resposta mínima; refine quando for usar anexos/corpo da mensagem. */
 export type GenesysEmailMessage = Record<string, unknown>;
@@ -28,6 +28,9 @@ export class GenesysApiService {
     });
 
     if (!response.ok) {
+      if (response.status === 401) {
+        throw new UnauthorizedException();
+      }
       const body = await response.text().catch(() => '');
       throw new Error(
         `Genesys GET message failed: ${response.status} ${response.statusText}${body ? ` — ${body}` : ''}`,
