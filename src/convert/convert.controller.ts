@@ -9,7 +9,7 @@ import {
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ConvertService } from './convert.service';
-import { buildAttachmentContentDisposition } from './utils/content-disposition';
+import { buildAttachmentContentDisposition } from '../common/utils/content-disposition';
 
 @Controller('convert')
 export class ConvertController {
