@@ -14,6 +14,7 @@ import type { Request } from 'express';
 import { buildAttachmentContentDisposition } from '../common/utils/content-disposition';
 import { extractBearerToken } from '../common/utils/extract-bearer-token';
 import { GenesysApiService } from '../genesys/genesys-api.service';
+import { ConvertRequestDto } from './dto/convert-request.dto';
 import { ConvertService } from './convert.service';
 
 @Controller('convert')
@@ -28,15 +29,14 @@ export class ConvertController {
   @UseInterceptors(FileInterceptor('file'))
   async convert(
     @UploadedFile() file: Express.Multer.File,
-    @Body('conversationId') conversationId: string,
-    @Body('messageId') messageId: string,
+    @Body() body: ConvertRequestDto,
     @Req() request: Request,
   ): Promise<StreamableFile> {
     const bearerToken = extractBearerToken(request);
 
     await this.genesysApiService.getEmailMessage(
-      conversationId,
-      messageId,
+      body.conversationId,
+      body.messageId,
       bearerToken,
     );
 

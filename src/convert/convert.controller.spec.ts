@@ -4,6 +4,7 @@ import type { Request } from 'express';
 import { GenesysApiService } from '../genesys/genesys-api.service';
 import { ConvertController } from './convert.controller';
 import { ConvertService } from './convert.service';
+import { ConvertRequestDto } from './dto/convert-request.dto';
 import { createMulterFile } from './testing/multer-file.fixture';
 
 describe('ConvertController', () => {
@@ -45,12 +46,12 @@ describe('ConvertController', () => {
       headers: { authorization: 'Bearer test-token' },
     } as Request;
 
-    const result = await controller.convert(
-      file,
-      'conv-1',
-      'msg-1',
-      request,
-    );
+    const body: ConvertRequestDto = {
+      conversationId: 'conv-1',
+      messageId: 'msg-1',
+    };
+
+    const result = await controller.convert(file, body, request);
 
     expect(getEmailMessageMock).toHaveBeenCalledWith(
       'conv-1',
