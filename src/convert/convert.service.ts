@@ -15,42 +15,41 @@ export type ConvertXlsxResult = {
 export class ConvertService {
   async convert(file: Express.Multer.File): Promise<ConvertXlsxResult> {
     if (!file?.buffer?.length) {
-      throw new BadRequestException('Arquivo não enviado ou vazio.');
+      throw new BadRequestException('File was not sent or is empty.');
     }
 
     if (
       file.mimetype !== 'application/pdf' &&
       !file.originalname.endsWith('.pdf')
     ) {
-      throw new BadRequestException('Envie um arquivo PDF.');
+      throw new BadRequestException('Upload a PDF file.');
     }
 
     let text: string;
     try {
       text = await extractTextFromPdf(file.buffer);
     } catch {
-      throw new BadRequestException('Não foi possível ler o PDF.');
+      throw new BadRequestException('Could not read the PDF.');
     }
 
     try {
       assertSoulmvAgendaLayout(text);
     } catch (error) {
       const message =
-        error instanceof Error
-          ? error.message
-          : 'Layout SOULMV não reconhecido.';
+        error instanceof Error ? error.message : 'Unrecognized SOULMV layout.';
       throw new BadRequestException(message);
     }
 
     const rows = parseSoulmvAgendaText(text);
     if (rows.length === 0) {
       throw new BadRequestException(
-        'Nenhum paciente encontrado no PDF. Verifique o layout do relatório.',
+        'No patients found in the PDF. Check the report layout.',
       );
     }
 
     const buffer = await rowsToXlsxBuffer(rows);
-    const baseName = file.originalname.replace(/\.pdf$/i, '') || 'agendamentos';
+    const baseName =
+      file.originalname.replace(/\.pdf$/i, '') || 'scheduled-patients';
 
     return {
       buffer,

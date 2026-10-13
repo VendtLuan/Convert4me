@@ -1,19 +1,19 @@
 export type AgendaBlockMetadata = {
-  data: string;
-  endereco: string;
-  unidade: string;
-  prestador: string;
-  funcionamentoInicio: string;
-  funcionamentoFim: string;
-  agenda: string;
+  appointmentDate: string;
+  address: string;
+  unit: string;
+  provider: string;
+  scheduleStart: string;
+  scheduleEnd: string;
+  scheduleId: string;
 };
 
 export type ScheduledPatientRow = AgendaBlockMetadata & {
-  tpAtendPlano: string;
-  convenio: string;
-  procedimento: string;
-  telefone: string;
-  paciente: string;
-  matricula: string;
-  hora: string;
+  planType: string;
+  insurance: string;
+  procedure: string;
+  phone: string;
+  patient: string;
+  medicalRecordId: string;
+  appointmentTime: string;
 };

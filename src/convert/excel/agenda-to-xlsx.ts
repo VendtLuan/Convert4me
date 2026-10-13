@@ -4,54 +4,54 @@ import type { ScheduledPatientRow } from '../types/scheduled-patient-row';
 const DATE_FMT = 'dd/mm/yyyy';
 const TIME_FMT = 'hh:mm';
 
-function parseBrDate(value: string): Date {
+function parseBrazilianDateString(value: string): Date {
   const [day, month, year] = value.split('/').map(Number);
   return new Date(year, month - 1, day);
 }
 
-function parseTime(value: string): Date {
+function parseTimeString(value: string): Date {
   const [hours, minutes] = value.split(':').map(Number);
   return new Date(Date.UTC(1899, 11, 30, hours, minutes));
 }
 
 const HEADERS = [
-  'Data',
-  'Prestador',
-  'FuncionamentoInicio',
-  'FuncionamentoFim',
-  'Agenda',
-  'Hora',
-  'Matricula',
-  'Paciente',
-  'Telefone',
-  'Procedimento',
-  'Convenio',
-  'TpAtendPlano',
+  'Date',
+  'Provider',
+  'ScheduleStart',
+  'ScheduleEnd',
+  'ScheduleId',
+  'AppointmentTime',
+  'MedicalRecordId',
+  'Patient',
+  'Phone',
+  'Procedure',
+  'Insurance',
+  'PlanType',
 ] as const;
 
 export async function rowsToXlsxBuffer(
   rows: ScheduledPatientRow[],
 ): Promise<Buffer> {
   const workbook = new ExcelJS.Workbook();
-  const sheet = workbook.addWorksheet('Agendamentos');
+  const sheet = workbook.addWorksheet('Appointments');
 
   sheet.addRow([...HEADERS]);
   sheet.getRow(1).font = { bold: true };
 
   for (const row of rows) {
     const excelRow = sheet.addRow([
-      parseBrDate(row.data),
-      row.prestador,
-      parseTime(row.funcionamentoInicio),
-      parseTime(row.funcionamentoFim),
-      row.agenda,
-      parseTime(row.hora),
-      row.matricula,
-      row.paciente,
-      row.telefone,
-      row.procedimento,
-      row.convenio,
-      row.tpAtendPlano,
+      parseBrazilianDateString(row.appointmentDate),
+      row.provider,
+      parseTimeString(row.scheduleStart),
+      parseTimeString(row.scheduleEnd),
+      row.scheduleId,
+      parseTimeString(row.appointmentTime),
+      row.medicalRecordId,
+      row.patient,
+      row.phone,
+      row.procedure,
+      row.insurance,
+      row.planType,
     ]);
 
     excelRow.getCell(1).numFmt = DATE_FMT;

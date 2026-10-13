@@ -13,7 +13,7 @@ export async function extractTextFromPdf(buffer: Buffer): Promise<string> {
 export function assertSoulmvAgendaLayout(text: string): void {
   if (!text.includes('Lista de Pacientes Agendados')) {
     throw new Error(
-      'Layout SOULMV não reconhecido: relatório de pacientes agendados ausente.',
+      'Unrecognized SOULMV layout: scheduled patient list not found.',
     );
   }
 }

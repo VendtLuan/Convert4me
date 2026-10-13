@@ -1,5 +1,5 @@
 export function buildAttachmentContentDisposition(filename: string): string {
-  const normalized = filename.trim() || 'pacientes-agendados.xlsx';
+  const normalized = filename.trim() || 'scheduled-patients.xlsx';
   const asciiFallback = normalized
     .replace(/[^\x20-\x7E]/g, '_')
     .replace(/["\\]/g, '_')

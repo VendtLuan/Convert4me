@@ -5,7 +5,7 @@ import type {
 
 const DATE_LINE = /^(\d{2}\/\d{2}\/\d{4})\tData:\s*$/;
 const TIME = /^\d{2}:\d{2}$/;
-const MATRICULA = /^\d+$/;
+const RECORD_NUMBER = /^\d+$/;
 const PAGE_MARKER = /^-- \d+ of \d+ --$/;
 
 function splitTabPair(line: string): [string, string] {
@@ -75,38 +75,41 @@ function isPatientRow(line: string): boolean {
   if (parts.length < 6) {
     return false;
   }
-  const hora = parts[parts.length - 1]?.trim();
-  const matricula = parts[parts.length - 2]?.trim();
-  return TIME.test(hora ?? '') && MATRICULA.test(matricula ?? '');
+  const appointmentTime = parts[parts.length - 1]?.trim();
+  const medicalRecordId = parts[parts.length - 2]?.trim();
+  return (
+    TIME.test(appointmentTime ?? '') &&
+    RECORD_NUMBER.test(medicalRecordId ?? '')
+  );
 }
 
 function parsePatientColumns(
   line: string,
 ): Omit<ScheduledPatientRow, keyof AgendaBlockMetadata> {
   const parts = line.split('\t').map((p) => p.trim());
-  const hora = parts[parts.length - 1] ?? '';
-  const matricula = parts[parts.length - 2] ?? '';
+  const appointmentTime = parts[parts.length - 1] ?? '';
+  const medicalRecordId = parts[parts.length - 2] ?? '';
 
   if (parts.length >= 7) {
     return {
-      tpAtendPlano: parts[0] ?? '',
-      convenio: parts[1] ?? '',
-      procedimento: parts[2] ?? '',
-      telefone: parts[3] ?? '',
-      paciente: parts[4] ?? '',
-      matricula,
-      hora,
+      planType: parts[0] ?? '',
+      insurance: parts[1] ?? '',
+      procedure: parts[2] ?? '',
+      phone: parts[3] ?? '',
+      patient: parts[4] ?? '',
+      medicalRecordId,
+      appointmentTime,
     };
   }
 
   return {
-    tpAtendPlano: parts[0] ?? '',
-    convenio: parts[1] ?? '',
-    procedimento: parts[2] ?? '',
-    telefone: '',
-    paciente: parts[3] ?? '',
-    matricula,
-    hora,
+    planType: parts[0] ?? '',
+    insurance: parts[1] ?? '',
+    procedure: parts[2] ?? '',
+    phone: '',
+    patient: parts[3] ?? '',
+    medicalRecordId,
+    appointmentTime,
   };
 }
 
@@ -120,13 +123,13 @@ function readBlockMetadata(
     return null;
   }
 
-  const enderecoLine = lines[startIndex + 1] ?? '';
-  const [endereco, unidade] = splitTabPair(enderecoLine);
-  const prestador = (lines[startIndex + 2] ?? '').trim();
-  const [funcionamentoFim, funcionamentoInicio] = splitTabPair(
+  const addressLine = lines[startIndex + 1] ?? '';
+  const [address, unit] = splitTabPair(addressLine);
+  const provider = (lines[startIndex + 2] ?? '').trim();
+  const [scheduleEnd, scheduleStart] = splitTabPair(
     lines[startIndex + 3] ?? '',
   );
-  const agenda = (lines[startIndex + 4] ?? '').trim();
+  const scheduleId = (lines[startIndex + 4] ?? '').trim();
 
   let nextIndex = startIndex + 5;
   while (nextIndex < lines.length && !isTableHeader(lines[nextIndex] ?? '')) {
@@ -135,13 +138,13 @@ function readBlockMetadata(
 
   return {
     block: {
-      data: match[1] ?? '',
-      endereco,
-      unidade,
-      prestador,
-      funcionamentoInicio,
-      funcionamentoFim,
-      agenda,
+      appointmentDate: match[1] ?? '',
+      address,
+      unit,
+      provider,
+      scheduleStart,
+      scheduleEnd,
+      scheduleId,
     },
     nextIndex,
   };
