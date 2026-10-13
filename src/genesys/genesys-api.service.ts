@@ -1,6 +1,5 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 
-/** Resposta mínima; refine quando for usar anexos/corpo da mensagem. */
 export type GenesysEmailMessage = Record<string, unknown>;
 
 @Injectable()
