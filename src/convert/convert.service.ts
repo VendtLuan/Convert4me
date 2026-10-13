@@ -5,11 +5,7 @@ import {
   assertSoulmvAgendaLayout,
   extractTextFromPdf,
 } from './pdf/extract-text-from-pdf';
-
-export type ConvertXlsxResult = {
-  buffer: Buffer;
-  filename: string;
-};
+import type { ConvertXlsxResult } from './types/convert-xlsx-result';
 
 @Injectable()
 export class ConvertService {

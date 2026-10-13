@@ -12,16 +12,9 @@ import {
 import { FileInterceptor } from '@nestjs/platform-express';
 import type { Request } from 'express';
 import { buildAttachmentContentDisposition } from '../common/utils/content-disposition';
+import { extractBearerToken } from '../common/utils/extract-bearer-token';
 import { GenesysApiService } from '../genesys/genesys-api.service';
 import { ConvertService } from './convert.service';
-
-function extractBearerToken(request: Request): string {
-  const authorization = request.headers.authorization;
-  if (!authorization?.startsWith('Bearer ')) {
-    return '';
-  }
-  return authorization.slice('Bearer '.length).trim();
-}
 
 @Controller('convert')
 export class ConvertController {
