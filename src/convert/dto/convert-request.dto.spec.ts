@@ -13,11 +13,22 @@ describe('ConvertRequestDto', () => {
     expect(errors).toHaveLength(0);
   });
 
-  it('rejects missing or empty fields', async () => {
+  it('accepts empty body when PDF is sent via multipart', async () => {
     const dto = new ConvertRequestDto();
 
     const errors = await validate(dto);
 
-    expect(errors.length).toBeGreaterThan(0);
+    expect(errors).toHaveLength(0);
+  });
+
+  it('rejects empty string when field is present', async () => {
+    const dto = Object.assign(new ConvertRequestDto(), {
+      conversationId: '',
+      messageId: 'msg-1',
+    });
+
+    const errors = await validate(dto);
+
+    expect(errors.some((e) => e.property === 'conversationId')).toBe(true);
   });
 });

@@ -10,12 +10,11 @@ import { createMulterFile } from './testing/multer-file.fixture';
 describe('ConvertController', () => {
   let controller: ConvertController;
   const convertMock = jest.fn();
-  const getEmailMessageMock = jest.fn();
+  const downloadPdfFromEmailMessageMock = jest.fn();
 
   beforeEach(async () => {
     convertMock.mockReset();
-    getEmailMessageMock.mockReset();
-    getEmailMessageMock.mockResolvedValue({});
+    downloadPdfFromEmailMessageMock.mockReset();
 
     const module: TestingModule = await Test.createTestingModule({
       controllers: [ConvertController],
@@ -26,7 +25,9 @@ describe('ConvertController', () => {
         },
         {
           provide: GenesysApiService,
-          useValue: { getEmailMessage: getEmailMessageMock },
+          useValue: {
+            downloadPdfFromEmailMessage: downloadPdfFromEmailMessageMock,
+          },
         },
       ],
     }).compile();
@@ -34,7 +35,7 @@ describe('ConvertController', () => {
     controller = module.get(ConvertController);
   });
 
-  it('returns StreamableFile with spreadsheet headers', async () => {
+  it('uses uploaded PDF without calling Genesys', async () => {
     const buffer = Buffer.from('PK-mock-xlsx');
     convertMock.mockResolvedValue({
       buffer,
@@ -46,37 +47,46 @@ describe('ConvertController', () => {
       headers: { authorization: 'Bearer test-token' },
     } as Request;
 
+    const result = await controller.convert(file, {}, request);
+
+    expect(downloadPdfFromEmailMessageMock).not.toHaveBeenCalled();
+    expect(convertMock).toHaveBeenCalledWith(file);
+    expect(result).toBeInstanceOf(StreamableFile);
+  });
+
+  it('downloads PDF from Genesys when no file is uploaded', async () => {
+    const xlsxBuffer = Buffer.from('PK-mock-xlsx');
+    convertMock.mockResolvedValue({
+      buffer: xlsxBuffer,
+      filename: 'comprovante_pagamento.xlsx',
+    });
+    downloadPdfFromEmailMessageMock.mockResolvedValue({
+      buffer: Buffer.from('%PDF-genesys'),
+      filename: 'comprovante_pagamento.pdf',
+    });
+
     const body: ConvertRequestDto = {
       conversationId: 'conv-1',
       messageId: 'msg-1',
     };
+    const request = {
+      headers: { authorization: 'Bearer test-token' },
+    } as Request;
 
-    const result = await controller.convert(file, body, request);
+    const result = await controller.convert(undefined, body, request);
 
-    expect(getEmailMessageMock).toHaveBeenCalledWith(
+    expect(downloadPdfFromEmailMessageMock).toHaveBeenCalledWith(
       'conv-1',
       'msg-1',
       'test-token',
     );
-    expect(convertMock).toHaveBeenCalledWith(file);
-    expect(result).toBeInstanceOf(StreamableFile);
-
-    const streamable = result as StreamableFile;
-    const options = (
-      streamable as unknown as {
-        options: {
-          type: string;
-          disposition: string;
-          length: number;
-        };
-      }
-    ).options;
-
-    expect(options.type).toBe(
-      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    expect(convertMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        buffer: Buffer.from('%PDF-genesys'),
+        originalname: 'comprovante_pagamento.pdf',
+        mimetype: 'application/pdf',
+      }),
     );
-    expect(options.disposition).toContain('attachment;');
-    expect(options.disposition).toContain('agenda.xlsx');
-    expect(options.length).toBe(buffer.length);
+    expect(result).toBeInstanceOf(StreamableFile);
   });
 });

@@ -1,11 +1,14 @@
-import { IsNotEmpty, IsString } from 'class-validator';
+import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
 
 export class ConvertRequestDto {
+  /** Obrigatório quando o PDF não é enviado no multipart (fluxo Genesys). */
+  @IsOptional()
   @IsString()
   @IsNotEmpty()
-  conversationId!: string;
+  conversationId?: string;
 
+  @IsOptional()
   @IsString()
   @IsNotEmpty()
-  messageId!: string;
+  messageId?: string;
 }
