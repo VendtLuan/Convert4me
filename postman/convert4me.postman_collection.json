@@ -1,0 +1,41 @@
+{
+  "info": {
+    "_postman_id": "convert4me-collection",
+    "name": "convert4me",
+    "description": "Conversão PDF SOULMV → Excel.\n\n## Como baixar o .xlsx no Postman\n\n1. Body → **form-data** → key **file** (tipo **File**) → marque o checkbox e selecione o PDF.\n2. Use **Send and Download** (seta ao lado de **Send**), não só **Send** — o Postman salva o arquivo direto no disco.\n3. Alternativa: após **Send**, clique **Save response** → **Save to a file**.\n\nNão defina `Content-Type` manualmente nos Headers; o Postman monta o multipart sozinho.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Converter PDF para Excel",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "file",
+              "type": "file",
+              "src": [],
+              "description": "Relatório SOULMV (Lista de Pacientes Agendados) em PDF"
+            }
+          ]
+        },
+        "url": {
+          "raw": "{{baseUrl}}/convert",
+          "host": ["{{baseUrl}}"],
+          "path": ["convert"]
+        },
+        "description": "Retorna planilha `.xlsx`. Prefira **Send and Download** para gravar o arquivo."
+      },
+      "response": []
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000"
+    }
+  ]
+}
