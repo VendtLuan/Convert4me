@@ -23,14 +23,14 @@ describe('rowsToXlsxBuffer', () => {
 
     const workbook = await loadWorkbook(buffer);
 
-    const sheet = workbook.getWorksheet('Appointments');
+    const sheet = workbook.getWorksheet('Agendamentos');
     expect(sheet).toBeDefined();
     expect(sheet?.rowCount).toBe(rows.length + 1);
 
     const headerRow = sheet?.getRow(1);
-    expect(headerRow?.getCell(1).value).toBe('Date');
-    expect(headerRow?.getCell(8).value).toBe('Patient');
-    expect(headerRow?.getCell(12).value).toBe('PlanType');
+    expect(headerRow?.getCell(1).value).toBe('Data');
+    expect(headerRow?.getCell(8).value).toBe('Paciente');
+    expect(headerRow?.getCell(12).value).toBe('TpAtendPlano');
     expect(headerRow?.font?.bold).toBe(true);
 
     const firstDataRow = sheet?.getRow(2);
@@ -45,8 +45,8 @@ describe('rowsToXlsxBuffer', () => {
     const buffer = await rowsToXlsxBuffer([]);
     const workbook = await loadWorkbook(buffer);
 
-    const sheet = workbook.getWorksheet('Appointments');
+    const sheet = workbook.getWorksheet('Agendamentos');
     expect(sheet?.rowCount).toBe(1);
-    expect(sheet?.getRow(1).getCell(1).value).toBe('Date');
+    expect(sheet?.getRow(1).getCell(1).value).toBe('Data');
   });
 });

@@ -15,25 +15,25 @@ function parseTimeString(value: string): Date {
 }
 
 const HEADERS = [
-  'Date',
-  'Provider',
-  'ScheduleStart',
-  'ScheduleEnd',
-  'ScheduleId',
-  'AppointmentTime',
-  'MedicalRecordId',
-  'Patient',
-  'Phone',
-  'Procedure',
-  'Insurance',
-  'PlanType',
+  'Data',
+  'Prestador',
+  'FuncionamentoInicio',
+  'FuncionamentoFim',
+  'Agenda',
+  'Hora',
+  'Matricula',
+  'Paciente',
+  'Telefone',
+  'Procedimento',
+  'Convenio',
+  'TpAtendPlano',
 ] as const;
 
 export async function rowsToXlsxBuffer(
   rows: ScheduledPatientRow[],
 ): Promise<Buffer> {
   const workbook = new ExcelJS.Workbook();
-  const sheet = workbook.addWorksheet('Appointments');
+  const sheet = workbook.addWorksheet('Agendamentos');
 
   sheet.addRow([...HEADERS]);
   sheet.getRow(1).font = { bold: true };
