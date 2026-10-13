@@ -1,5 +1,7 @@
 import { StreamableFile } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
+import type { Request } from 'express';
+import { GenesysApiService } from '../genesys/genesys-api.service';
 import { ConvertController } from './convert.controller';
 import { ConvertService } from './convert.service';
 import { createMulterFile } from './testing/multer-file.fixture';
@@ -7,15 +9,23 @@ import { createMulterFile } from './testing/multer-file.fixture';
 describe('ConvertController', () => {
   let controller: ConvertController;
   const convertMock = jest.fn();
+  const getEmailMessageMock = jest.fn();
 
   beforeEach(async () => {
     convertMock.mockReset();
+    getEmailMessageMock.mockReset();
+    getEmailMessageMock.mockResolvedValue({});
+
     const module: TestingModule = await Test.createTestingModule({
       controllers: [ConvertController],
       providers: [
         {
           provide: ConvertService,
           useValue: { convert: convertMock },
+        },
+        {
+          provide: GenesysApiService,
+          useValue: { getEmailMessage: getEmailMessageMock },
         },
       ],
     }).compile();
@@ -31,8 +41,22 @@ describe('ConvertController', () => {
     });
 
     const file = createMulterFile({ buffer: Buffer.from('%PDF') });
-    const result = await controller.convert(file);
+    const request = {
+      headers: { authorization: 'Bearer test-token' },
+    } as Request;
 
+    const result = await controller.convert(
+      file,
+      'conv-1',
+      'msg-1',
+      request,
+    );
+
+    expect(getEmailMessageMock).toHaveBeenCalledWith(
+      'conv-1',
+      'msg-1',
+      'test-token',
+    );
     expect(convertMock).toHaveBeenCalledWith(file);
     expect(result).toBeInstanceOf(StreamableFile);
 
