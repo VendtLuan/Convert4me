@@ -1,10 +1,10 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { rowsToXlsxBuffer } from './excel/agenda-to-xlsx';
+import { parseSoulmvAgendaText } from './parser/soulmv-agenda.parser';
 import {
   assertSoulmvAgendaLayout,
   extractTextFromPdf,
 } from './pdf/extract-text-from-pdf';
-import { parseSoulmvAgendaText } from './parser/soulmv-agenda.parser';
 
 export type ConvertXlsxResult = {
   buffer: Buffer;

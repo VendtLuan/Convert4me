@@ -16,8 +16,6 @@ function parseTime(value: string): Date {
 
 const HEADERS = [
   'Data',
-  'Endereco',
-  'Unidade',
   'Prestador',
   'FuncionamentoInicio',
   'FuncionamentoFim',
@@ -43,8 +41,6 @@ export async function rowsToXlsxBuffer(
   for (const row of rows) {
     const excelRow = sheet.addRow([
       parseBrDate(row.data),
-      row.endereco,
-      row.unidade,
       row.prestador,
       parseTime(row.funcionamentoInicio),
       parseTime(row.funcionamentoFim),
@@ -59,14 +55,14 @@ export async function rowsToXlsxBuffer(
     ]);
 
     excelRow.getCell(1).numFmt = DATE_FMT;
-    excelRow.getCell(5).numFmt = TIME_FMT;
+    excelRow.getCell(3).numFmt = TIME_FMT;
+    excelRow.getCell(4).numFmt = TIME_FMT;
     excelRow.getCell(6).numFmt = TIME_FMT;
-    excelRow.getCell(8).numFmt = TIME_FMT;
   }
 
   sheet.autoFilter = {
     from: 'A1',
-    to: `N${Math.max(1, rows.length + 1)}`,
+    to: `L${Math.max(1, rows.length + 1)}`,
   };
 
   const buffer = await workbook.xlsx.writeBuffer();
