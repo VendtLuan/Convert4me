@@ -31,6 +31,10 @@ describe('parseSoulmvAgendaText', () => {
     });
   });
 
+  it('returns no rows for empty text', () => {
+    expect(parseSoulmvAgendaText('')).toEqual([]);
+  });
+
   it('leaves phone empty when missing from the PDF row', () => {
     const text = readFileSync(fixturePath, 'utf8');
     const rows = parseSoulmvAgendaText(text);
