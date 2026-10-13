@@ -1,4 +1,5 @@
 import { BadRequestException, UnauthorizedException } from '@nestjs/common';
+import * as soulmvPdfFormat from '../convert/pdf/soulmv-pdf-format';
 import { GenesysApiService } from './genesys-api.service';
 
 describe('GenesysApiService', () => {
@@ -7,6 +8,7 @@ describe('GenesysApiService', () => {
 
   beforeEach(() => {
     process.env.GENESYS_API_URL = 'https://api.example.com';
+    jest.restoreAllMocks();
   });
 
   afterEach(() => {
@@ -18,7 +20,7 @@ describe('GenesysApiService', () => {
     }
   });
 
-  it('downloadPdfFromEmailMessage picks PDF attachment and downloads contentUri', async () => {
+  it('skips non-SOULMV PDFs and returns the first matching attachment', async () => {
     const fetchMock = jest
       .fn()
       .mockResolvedValueOnce({
@@ -28,16 +30,30 @@ describe('GenesysApiService', () => {
             {
               name: 'comprovante.pdf',
               contentType: 'application/pdf',
-              contentUri: 'https://cdn.example.com/file.pdf',
+              contentUri: 'https://cdn.example.com/invalid.pdf',
+            },
+            {
+              name: 'agenda.pdf',
+              contentType: 'application/pdf',
+              contentUri: 'https://cdn.example.com/valid.pdf',
             },
           ],
         }),
       })
       .mockResolvedValueOnce({
         ok: true,
-        arrayBuffer: async () => Uint8Array.from([37, 80, 68, 70]).buffer,
+        arrayBuffer: async () => Uint8Array.from([37, 80, 68, 70, 1]).buffer,
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        arrayBuffer: async () => Uint8Array.from([37, 80, 68, 70, 2]).buffer,
       });
     global.fetch = fetchMock as typeof fetch;
+
+    jest
+      .spyOn(soulmvPdfFormat, 'isSoulmvAgendaPdfFormat')
+      .mockResolvedValueOnce(false)
+      .mockResolvedValueOnce(true);
 
     const service = new GenesysApiService();
     const result = await service.downloadPdfFromEmailMessage(
@@ -46,10 +62,10 @@ describe('GenesysApiService', () => {
       'token',
     );
 
-    expect(result.filename).toBe('comprovante.pdf');
-    expect(result.buffer.toString()).toBe('%PDF');
-    expect(fetchMock).toHaveBeenCalledTimes(2);
-    expect(fetchMock.mock.calls[1]?.[0]).toBe('https://cdn.example.com/file.pdf');
+    expect(result.filename).toBe('agenda.pdf');
+    expect(result.buffer).toEqual(Buffer.from([37, 80, 68, 70, 2]));
+    expect(fetchMock).toHaveBeenCalledTimes(3);
+    expect(soulmvPdfFormat.isSoulmvAgendaPdfFormat).toHaveBeenCalledTimes(2);
   });
 
   it('throws UnauthorizedException when Genesys returns 401', async () => {
@@ -77,6 +93,42 @@ describe('GenesysApiService', () => {
 
     await expect(
       service.downloadPdfFromEmailMessage('conv-1', 'msg-1', 'token'),
-    ).rejects.toBeInstanceOf(BadRequestException);
+    ).rejects.toThrow(
+      new BadRequestException('No PDF attachment found in the email message.'),
+    );
+  });
+
+  it('throws when every PDF attachment fails SOULMV format check', async () => {
+    const fetchMock = jest
+      .fn()
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({
+          attachments: [
+            {
+              name: 'a.pdf',
+              contentType: 'application/pdf',
+              contentUri: 'https://cdn.example.com/a.pdf',
+            },
+          ],
+        }),
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        arrayBuffer: async () => Uint8Array.from([37, 80, 68, 70]).buffer,
+      });
+    global.fetch = fetchMock as typeof fetch;
+
+    jest.spyOn(soulmvPdfFormat, 'isSoulmvAgendaPdfFormat').mockResolvedValue(false);
+
+    const service = new GenesysApiService();
+
+    await expect(
+      service.downloadPdfFromEmailMessage('conv-1', 'msg-1', 'token'),
+    ).rejects.toThrow(
+      new BadRequestException(
+        'No attachment matches the expected SOULMV agenda PDF format.',
+      ),
+    );
   });
 });

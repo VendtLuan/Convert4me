@@ -1,10 +1,7 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { rowsToXlsxBuffer } from './excel/agenda-to-xlsx';
 import { parseSoulmvAgendaText } from './parser/soulmv-agenda.parser';
-import {
-  assertSoulmvAgendaLayout,
-  extractTextFromPdf,
-} from './pdf/extract-text-from-pdf';
+import { extractValidatedSoulmvAgendaText } from './pdf/soulmv-pdf-format';
 import type { ConvertXlsxResult } from './types/convert-xlsx-result';
 
 @Injectable()
@@ -21,21 +18,7 @@ export class ConvertService {
       throw new BadRequestException('Upload a PDF file.');
     }
 
-    let text: string;
-    try {
-      text = await extractTextFromPdf(file.buffer);
-    } catch {
-      throw new BadRequestException('Could not read the PDF.');
-    }
-
-    try {
-      assertSoulmvAgendaLayout(text);
-    } catch (error) {
-      const message =
-        error instanceof Error ? error.message : 'Unrecognized SOULMV layout.';
-      throw new BadRequestException(message);
-    }
-
+    const text = await extractValidatedSoulmvAgendaText(file.buffer);
     const rows = parseSoulmvAgendaText(text);
     if (rows.length === 0) {
       throw new BadRequestException(

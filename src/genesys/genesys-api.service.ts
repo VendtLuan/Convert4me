@@ -3,6 +3,7 @@ import {
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
+import { isSoulmvAgendaPdfFormat } from '../convert/pdf/soulmv-pdf-format';
 import type {
   GenesysEmailAttachment,
   GenesysEmailMessage,
@@ -52,27 +53,39 @@ export class GenesysApiService {
       messageId,
       bearerToken,
     );
-    const attachment = this.findPdfAttachment(message);
-    if (!attachment?.contentUri) {
+    const attachments = this.findAllPdfAttachments(message);
+    if (attachments.length === 0) {
       throw new BadRequestException(
         'No PDF attachment found in the email message.',
       );
     }
 
-    const buffer = await this.downloadBinary(
-      attachment.contentUri,
-      bearerToken,
-    );
-    const filename = attachment.name?.trim() || 'attachment.pdf';
+    for (const attachment of attachments) {
+      if (!attachment.contentUri) {
+        continue;
+      }
 
-    return { buffer, filename };
+      const buffer = await this.downloadBinary(
+        attachment.contentUri,
+        bearerToken,
+      );
+      const matchesFormat = await isSoulmvAgendaPdfFormat(buffer);
+      if (matchesFormat) {
+        const filename = attachment.name?.trim() || 'attachment.pdf';
+        return { buffer, filename };
+      }
+    }
+
+    throw new BadRequestException(
+      'No attachment matches the expected SOULMV agenda PDF format.',
+    );
   }
 
-  private findPdfAttachment(
+  private findAllPdfAttachments(
     message: GenesysEmailMessage,
-  ): GenesysEmailAttachment | undefined {
+  ): GenesysEmailAttachment[] {
     const attachments = message.attachments ?? [];
-    return attachments.find((attachment) => this.isPdfAttachment(attachment));
+    return attachments.filter((attachment) => this.isPdfAttachment(attachment));
   }
 
   private isPdfAttachment(attachment: GenesysEmailAttachment): boolean {
