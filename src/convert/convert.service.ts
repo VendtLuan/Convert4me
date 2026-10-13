@@ -4,7 +4,7 @@ import { UpdateConvertDto } from './dto/update-convert.dto';
 
 @Injectable()
 export class ConvertService {
-  create(createConvertDto: CreateConvertDto) {
+  create(file: Express.Multer.File) {
     return 'This action adds a new convert';
   }
 
