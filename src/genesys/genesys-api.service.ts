@@ -4,6 +4,7 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { isSoulmvAgendaPdfFormat } from '../convert/pdf/soulmv-pdf-format';
+import { resolveGenesysMaxPdfAttachmentsToCheck } from './genesys-pdf-scan.constants';
 import type {
   GenesysEmailAttachment,
   GenesysEmailMessage,
@@ -53,12 +54,15 @@ export class GenesysApiService {
       messageId,
       bearerToken,
     );
-    const attachments = this.findAllPdfAttachments(message);
-    if (attachments.length === 0) {
+    const pdfAttachments = this.findAllPdfAttachments(message);
+    if (pdfAttachments.length === 0) {
       throw new BadRequestException(
         'No PDF attachment found in the email message.',
       );
     }
+
+    const maxToCheck = resolveGenesysMaxPdfAttachmentsToCheck();
+    const attachments = pdfAttachments.slice(0, maxToCheck);
 
     for (const attachment of attachments) {
       if (!attachment.contentUri) {
@@ -70,10 +74,12 @@ export class GenesysApiService {
         bearerToken,
       );
       const matchesFormat = await isSoulmvAgendaPdfFormat(buffer);
-      if (matchesFormat) {
-        const filename = attachment.name?.trim() || 'attachment.pdf';
-        return { buffer, filename };
+      if (!matchesFormat) {
+        continue;
       }
+
+      const filename = attachment.name?.trim() || 'attachment.pdf';
+      return { buffer, filename };
     }
 
     throw new BadRequestException(

@@ -5,9 +5,11 @@ import { GenesysApiService } from './genesys-api.service';
 describe('GenesysApiService', () => {
   const originalFetch = global.fetch;
   const originalGenesysUrl = process.env.GENESYS_API_URL;
+  const originalMaxPdfCheck = process.env.GENESYS_MAX_PDF_ATTACHMENTS_TO_CHECK;
 
   beforeEach(() => {
     process.env.GENESYS_API_URL = 'https://api.example.com';
+    delete process.env.GENESYS_MAX_PDF_ATTACHMENTS_TO_CHECK;
     jest.restoreAllMocks();
   });
 
@@ -17,6 +19,11 @@ describe('GenesysApiService', () => {
       delete process.env.GENESYS_API_URL;
     } else {
       process.env.GENESYS_API_URL = originalGenesysUrl;
+    }
+    if (originalMaxPdfCheck === undefined) {
+      delete process.env.GENESYS_MAX_PDF_ATTACHMENTS_TO_CHECK;
+    } else {
+      process.env.GENESYS_MAX_PDF_ATTACHMENTS_TO_CHECK = originalMaxPdfCheck;
     }
   });
 
@@ -96,6 +103,41 @@ describe('GenesysApiService', () => {
     ).rejects.toThrow(
       new BadRequestException('No PDF attachment found in the email message.'),
     );
+  });
+
+  it('checks at most GENESYS_MAX_PDF_ATTACHMENTS_TO_CHECK PDFs', async () => {
+    process.env.GENESYS_MAX_PDF_ATTACHMENTS_TO_CHECK = '2';
+
+    const attachments = Array.from({ length: 4 }, (_, index) => ({
+      name: `file-${index}.pdf`,
+      contentType: 'application/pdf',
+      contentUri: `https://cdn.example.com/${index}.pdf`,
+    }));
+
+    const fetchMock = jest.fn().mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ attachments }),
+    });
+    for (let index = 0; index < 2; index += 1) {
+      fetchMock.mockResolvedValueOnce({
+        ok: true,
+        arrayBuffer: async () => Uint8Array.from([index]).buffer,
+      });
+    }
+    global.fetch = fetchMock as typeof fetch;
+
+    const formatSpy = jest
+      .spyOn(soulmvPdfFormat, 'isSoulmvAgendaPdfFormat')
+      .mockResolvedValue(false);
+
+    const service = new GenesysApiService();
+
+    await expect(
+      service.downloadPdfFromEmailMessage('conv-1', 'msg-1', 'token'),
+    ).rejects.toThrow(BadRequestException);
+
+    expect(formatSpy).toHaveBeenCalledTimes(2);
+    expect(fetchMock).toHaveBeenCalledTimes(3);
   });
 
   it('throws when every PDF attachment fails SOULMV format check', async () => {
