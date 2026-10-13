@@ -1,4 +1,10 @@
-import { Controller, Post, UploadedFile, UseInterceptors } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  StreamableFile,
+  UploadedFile,
+  UseInterceptors,
+} from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ConvertService } from './convert.service';
 
@@ -8,7 +14,13 @@ export class ConvertController {
 
   @Post()
   @UseInterceptors(FileInterceptor('file'))
-  create(@UploadedFile() file: Express.Multer.File) {
-    return this.convertService.create(file);
+  async convert(
+    @UploadedFile() file: Express.Multer.File,
+  ): Promise<StreamableFile> {
+    const { buffer, filename } = await this.convertService.convert(file);
+    return new StreamableFile(buffer, {
+      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      disposition: `attachment; filename="${filename}"`,
+    });
   }
 }
