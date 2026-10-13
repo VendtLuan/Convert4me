@@ -7,12 +7,10 @@ import {
   Req,
   StreamableFile,
   UploadedFile,
-  UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import type { Request } from 'express';
-import { AuthTokenGuard } from '../common/guards/auth-token.guard';
 import { buildAttachmentContentDisposition } from '../common/utils/content-disposition';
 import { GenesysApiService } from '../genesys/genesys-api.service';
 import { ConvertService } from './convert.service';
@@ -26,7 +24,6 @@ function extractBearerToken(request: Request): string {
 }
 
 @Controller('convert')
-@UseGuards(AuthTokenGuard)
 export class ConvertController {
   constructor(
     private readonly convertService: ConvertService,

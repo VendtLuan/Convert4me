@@ -5,7 +5,7 @@ API para converter relatório SOULMV (PDF — Lista de Pacientes Agendados) em p
 ### Testar no Postman
 
 1. Importe `postman/convert4me.postman_collection.json` e, opcionalmente, `postman/local.postman_environment.json`.
-2. Request **Converter PDF para Excel**: Body → **form-data** → key `file` (tipo **File**), checkbox marcado, PDF selecionado.
+2. Request **Converter PDF para Excel**: Body → **form-data** → `file` (tipo **File**), `conversationId` e `messageId` (texto).
 3. Para baixar o `.xlsx`, use **Send and Download** (menu na seta ao lado de **Send**) ou **Save response** → **Save to a file** após enviar.
 4. Não adicione header `Content-Type` manual; deixe o Postman montar o multipart.
 
@@ -13,13 +13,13 @@ Servidor local: `npm run start:dev` → `http://localhost:3000`.
 
 ### Autenticação
 
-Defina `AUTH_TOKEN` no ambiente (veja `.env.example`). O endpoint `POST /convert` exige:
+O endpoint `POST /convert` repassa o Bearer para a API Genesys (`GENESYS_API_URL` no `.env`):
 
 ```http
-Authorization: Bearer <AUTH_TOKEN>
+Authorization: Bearer <token Genesys>
 ```
 
-Sem token válido, a API responde `401 Unauthorized`.
+Configure `GENESYS_API_URL` (veja `.env.example`).
 
 ## Project setup
 
