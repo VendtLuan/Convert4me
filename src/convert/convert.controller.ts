@@ -5,13 +5,16 @@ import {
   Post,
   StreamableFile,
   UploadedFile,
+  UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { ConvertService } from './convert.service';
+import { AuthTokenGuard } from '../common/guards/auth-token.guard';
 import { buildAttachmentContentDisposition } from '../common/utils/content-disposition';
+import { ConvertService } from './convert.service';
 
 @Controller('convert')
+@UseGuards(AuthTokenGuard)
 export class ConvertController {
   constructor(private readonly convertService: ConvertService) {}
 

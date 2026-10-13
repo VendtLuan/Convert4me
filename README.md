@@ -11,6 +11,16 @@ API para converter relatório SOULMV (PDF — Lista de Pacientes Agendados) em p
 
 Servidor local: `npm run start:dev` → `http://localhost:3000`.
 
+### Autenticação
+
+Defina `AUTH_TOKEN` no ambiente (veja `.env.example`). O endpoint `POST /convert` exige:
+
+```http
+Authorization: Bearer <AUTH_TOKEN>
+```
+
+Sem token válido, a API responde `401 Unauthorized`.
+
 ## Project setup
 
 ```bash
