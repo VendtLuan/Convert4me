@@ -67,6 +67,21 @@ function isNoiseLine(line: string): boolean {
   return false;
 }
 
+const ATTENDANCE_TYPE_PREFIX = 'Ambulatorio';
+
+function splitTpAtendPlano(value: string): {
+  attendanceType: string;
+  plan: string;
+} {
+  const trimmed = value.trim();
+  if (!trimmed.startsWith(ATTENDANCE_TYPE_PREFIX)) {
+    return { attendanceType: trimmed, plan: '' };
+  }
+
+  const plan = trimmed.slice(ATTENDANCE_TYPE_PREFIX.length).trim();
+  return { attendanceType: ATTENDANCE_TYPE_PREFIX, plan };
+}
+
 function isPatientRow(line: string): boolean {
   if (!line.startsWith('Ambulatorio')) {
     return false;
@@ -90,9 +105,12 @@ function parsePatientColumns(
   const appointmentTime = parts[parts.length - 1] ?? '';
   const medicalRecordId = parts[parts.length - 2] ?? '';
 
+  const { attendanceType, plan } = splitTpAtendPlano(parts[0] ?? '');
+
   if (parts.length >= 7) {
     return {
-      planType: parts[0] ?? '',
+      attendanceType,
+      plan,
       insurance: parts[1] ?? '',
       procedure: parts[2] ?? '',
       phone: parts[3] ?? '',
@@ -103,7 +121,8 @@ function parsePatientColumns(
   }
 
   return {
-    planType: parts[0] ?? '',
+    attendanceType,
+    plan,
     insurance: parts[1] ?? '',
     procedure: parts[2] ?? '',
     phone: '',

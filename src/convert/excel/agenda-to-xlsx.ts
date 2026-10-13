@@ -26,7 +26,8 @@ const HEADERS = [
   'Telefone',
   'Procedimento',
   'Convenio',
-  'TpAtendPlano',
+  'TpAtend',
+  'Plano',
 ] as const;
 
 export async function rowsToXlsxBuffer(
@@ -51,7 +52,8 @@ export async function rowsToXlsxBuffer(
       row.phone,
       row.procedure,
       row.insurance,
-      row.planType,
+      row.attendanceType,
+      row.plan,
     ]);
 
     excelRow.getCell(1).numFmt = DATE_FMT;
@@ -62,7 +64,7 @@ export async function rowsToXlsxBuffer(
 
   sheet.autoFilter = {
     from: 'A1',
-    to: `L${Math.max(1, rows.length + 1)}`,
+    to: `M${Math.max(1, rows.length + 1)}`,
   };
 
   const buffer = await workbook.xlsx.writeBuffer();

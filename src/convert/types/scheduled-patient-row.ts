@@ -9,7 +9,8 @@ export type AgendaBlockMetadata = {
 };
 
 export type ScheduledPatientRow = AgendaBlockMetadata & {
-  planType: string;
+  attendanceType: string;
+  plan: string;
   insurance: string;
   procedure: string;
   phone: string;

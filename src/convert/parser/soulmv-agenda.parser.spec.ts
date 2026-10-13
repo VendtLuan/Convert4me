@@ -25,6 +25,8 @@ describe('parseSoulmvAgendaText', () => {
       scheduleStart: '07:00',
       scheduleEnd: '11:30',
       scheduleId: '2134927',
+      attendanceType: 'Ambulatorio',
+      plan: 'CNU INTERCAM',
       patient: 'KAMILLY VICTORIA RAMALHO LIRA',
       medicalRecordId: '2308968',
       appointmentTime: '07:00',

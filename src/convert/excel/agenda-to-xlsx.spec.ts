@@ -30,10 +30,13 @@ describe('rowsToXlsxBuffer', () => {
     const headerRow = sheet?.getRow(1);
     expect(headerRow?.getCell(1).value).toBe('Data');
     expect(headerRow?.getCell(8).value).toBe('Paciente');
-    expect(headerRow?.getCell(12).value).toBe('TpAtendPlano');
+    expect(headerRow?.getCell(12).value).toBe('TpAtend');
+    expect(headerRow?.getCell(13).value).toBe('Plano');
     expect(headerRow?.font?.bold).toBe(true);
 
     const firstDataRow = sheet?.getRow(2);
+    expect(firstDataRow?.getCell(12).value).toBe('Ambulatorio');
+    expect(firstDataRow?.getCell(13).value).toBe('CNU INTERCAM');
     expect(firstDataRow?.getCell(8).value).toBe(
       'KAMILLY VICTORIA RAMALHO LIRA',
     );
