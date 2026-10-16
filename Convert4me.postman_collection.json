@@ -1,0 +1,58 @@
+{
+  "info": {
+    "_postman_id": "4fd6b024-aeaf-4c0a-8e2d-efdf6479fb21",
+    "name": "Convert4me",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "58844905"
+  },
+  "item": [
+    {
+      "name": "Converter PDF",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{Token}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "file",
+              "type": "file",
+              "src": "/C:/Users/Luan vendt/Downloads/annaluiza (07h e 11h15) (2).pdf"
+            }
+          ]
+        },
+        "url": {
+          "raw": "{{URL}}/convert",
+          "host": [
+            "{{URL}}"
+          ],
+          "path": [
+            "convert"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Status",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": ""
+        }
+      },
+      "response": []
+    }
+  ]
+}
