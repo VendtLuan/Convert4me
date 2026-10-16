@@ -1,22 +1,26 @@
 {
   "info": {
-    "_postman_id": "convert4me-collection",
-    "name": "convert4me",
-    "description": "SOULMV PDF → Excel conversion.\n\n## Downloading the .xlsx in Postman\n\n1. Body → **form-data** → key **file** (type **File**) → enable the checkbox and select the PDF.\n2. Use **Send and Download** (arrow next to **Send**), not **Send** alone — Postman saves the file to disk.\n3. Alternatively, after **Send**, click **Save response** → **Save to a file**.\n\nDo not set `Content-Type` manually in Headers; Postman builds multipart automatically.",
+    "_postman_id": "4fd6b024-aeaf-4c0a-8e2d-efdf6479fb21",
+    "name": "Convert4me",
+    "description": "SOULMV PDF → Excel (NestJS).\n\n## Variáveis\n\nImporte `local.postman_environment.json`: **URL** (ex.: `http://localhost:3000`) e **Token** (Bearer Genesys, quando aplicável).\n\n## Converter PDF (upload)\n\n1. Body → **form-data** → **file** (tipo **File**) → selecione o PDF.\n2. Auth → Bearer → `{{Token}}` só é necessário no request **Converter PDF (Genesys)**.\n3. Use **Send and Download** para salvar o `.xlsx`.\n\nNão defina `Content-Type` manualmente; o Postman monta o multipart.\n\n## Converter PDF (Genesys)\n\nEnvie **conversationId** e **messageId** no form-data (sem arquivo); o serviço baixa o PDF via API Genesys.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "item": [
     {
-      "name": "Convert PDF to Excel",
+      "name": "Converter PDF",
       "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{Token}}",
+              "type": "string"
+            }
+          ]
+        },
         "method": "POST",
-        "header": [
-          {
-            "key": "Authorization",
-            "value": "Bearer {{authToken}}",
-            "type": "text"
-          }
-        ],
+        "header": [],
         "body": {
           "mode": "formdata",
           "formdata": [
@@ -24,24 +28,73 @@
               "key": "file",
               "type": "file",
               "src": [],
-              "description": "SOULMV scheduled patients report (PDF)"
+              "description": "Relatório SOULMV (PDF)"
             }
           ]
         },
         "url": {
-          "raw": "{{baseUrl}}/convert",
-          "host": ["{{baseUrl}}"],
+          "raw": "{{URL}}/convert",
+          "host": ["{{URL}}"],
           "path": ["convert"]
         },
-        "description": "Returns an `.xlsx` file. Prefer **Send and Download** to save the response."
+        "description": "POST multipart com campo `file`. Resposta: arquivo `.xlsx`."
       },
       "response": []
-    }
-  ],
-  "variable": [
+    },
     {
-      "key": "baseUrl",
-      "value": "http://localhost:3000"
+      "name": "Converter PDF (Genesys)",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{Token}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "conversationId",
+              "value": "",
+              "type": "text",
+              "description": "ID da conversa Genesys"
+            },
+            {
+              "key": "messageId",
+              "value": "",
+              "type": "text",
+              "description": "ID da mensagem de e-mail com o PDF"
+            }
+          ]
+        },
+        "url": {
+          "raw": "{{URL}}/convert",
+          "host": ["{{URL}}"],
+          "path": ["convert"]
+        },
+        "description": "Sem upload de PDF: `conversationId` e `messageId` obrigatórios. Bearer token Genesys na aba Auth."
+      },
+      "response": []
+    },
+    {
+      "name": "Status",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{URL}}/health",
+          "host": ["{{URL}}"],
+          "path": ["health"]
+        },
+        "description": "Health check. Resposta esperada: `{ \"message\": \"Ok\" }`."
+      },
+      "response": []
     }
   ]
 }

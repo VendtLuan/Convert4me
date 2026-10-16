@@ -2,6 +2,7 @@
   "info": {
     "_postman_id": "4fd6b024-aeaf-4c0a-8e2d-efdf6479fb21",
     "name": "Convert4me",
+    "description": "SOULMV PDF → Excel (NestJS).\n\n## Variáveis\n\nImporte `postman/local.postman_environment.json`: **URL** (ex.: `http://localhost:3000`) e **Token** (Bearer Genesys, quando aplicável).\n\n## Converter PDF (upload)\n\n1. Body → **form-data** → **file** (tipo **File**) → selecione o PDF.\n2. Auth → Bearer → `{{Token}}`.\n3. Use **Send and Download** para salvar o `.xlsx`.\n\n## Converter PDF (Genesys)\n\nEnvie **conversationId** e **messageId** no form-data (sem arquivo).",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
     "_exporter_id": "58844905"
   },
@@ -27,18 +28,53 @@
             {
               "key": "file",
               "type": "file",
-              "src": "/C:/Users/Luan vendt/Downloads/annaluiza (07h e 11h15) (2).pdf"
+              "src": [],
+              "description": "Relatório SOULMV (PDF)"
             }
           ]
         },
         "url": {
           "raw": "{{URL}}/convert",
-          "host": [
-            "{{URL}}"
-          ],
-          "path": [
-            "convert"
+          "host": ["{{URL}}"],
+          "path": ["convert"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Converter PDF (Genesys)",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{Token}}",
+              "type": "string"
+            }
           ]
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "conversationId",
+              "value": "",
+              "type": "text"
+            },
+            {
+              "key": "messageId",
+              "value": "",
+              "type": "text"
+            }
+          ]
+        },
+        "url": {
+          "raw": "{{URL}}/convert",
+          "host": ["{{URL}}"],
+          "path": ["convert"]
         }
       },
       "response": []
@@ -49,7 +85,9 @@
         "method": "GET",
         "header": [],
         "url": {
-          "raw": ""
+          "raw": "{{URL}}/health",
+          "host": ["{{URL}}"],
+          "path": ["health"]
         }
       },
       "response": []
